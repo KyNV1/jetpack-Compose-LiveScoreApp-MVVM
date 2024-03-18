@@ -17,14 +17,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kynv1.fsoft.jetpack_compose_livescoreapp_mvvm.ui.theme.JetpackComposeLiveScoreAppMVVMTheme
+import kynv1.fsoft.jetpack_compose_livescoreapp_mvvm.viewmodel.InplayMatchesViewModel
+import kynv1.fsoft.jetpack_compose_livescoreapp_mvvm.viewmodel.states.MatchesState
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +58,7 @@ fun LiveScore(
             .padding(10.dp)
     ) {
         TopAppBar()
+        FetchData()
     }
 }
 
@@ -81,6 +88,22 @@ fun TopAppBar(
 @Composable
 fun TopAppbarPreview() {
     TopAppBar()
+}
+
+@Composable
+fun FetchData(
+    modifier: Modifier = Modifier,
+    inplayMatchesViewModel: InplayMatchesViewModel = viewModel(),
+) {
+    Column(modifier = modifier) {
+        val state = inplayMatchesViewModel.inplayMatchesState.collectAsState()
+        when (state.value) {
+            is MatchesState.Empty -> Text(text = "no data available")
+            is MatchesState.Loading -> Text(text = "Loading....")
+            is MatchesState.Success -> Text(text = "Successful!")
+            is MatchesState.Error -> Text(text = (state.value as MatchesState.Error).errorMessage)
+        }
+    }
 }
 
 @Preview(showBackground = true)
